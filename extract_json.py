@@ -152,13 +152,45 @@ def vinbigdata():
     print('done processing metadata for vinbigdata dataset')
 
 
+def find_wav_files(directory):
+    wav_files = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith('.wav'):
+                wav_files.append(os.path.join(root, file))
+    return wav_files
+
+
+def vlsp():
+    directory = "/lustre/scratch/client/vinai/users/thivt1/data/VLSP_data"
+
+    # Get the list of WAV files
+    wav_files = find_wav_files(directory)
+
+    # Optionally, save the list to a file
+    with open('metadata/wav_file_list.txt', 'w') as f:
+        for file in wav_files:
+            f.write(f"{file}\n")
+
+    print(f"\nTotal WAV files found: {len(wav_files)}")
+    print("List saved to metadata/wav_file_list.txt")
+
+    durations = thread_map(get_duration, wav_files, max_workers=4)
+
+    metadata = [[file, duration] for file, duration in zip(wav_files, durations)]
+    df = pd.DataFrame(metadata, columns=['path', 'duration'])
+    df.to_csv('metadata/vlsp.csv', index=False)
+    print('done processing metadata for vlsp dataset')
+
+
 if __name__ == '__main__': 
     # sachnoi()
     # vin27()
-    vivoice()
+    # vivoice()
     # bud500()
     # vnceleb()
     # vinbigdata()
     # vivoice()
+    vlsp()
     
 
