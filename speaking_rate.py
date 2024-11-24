@@ -195,6 +195,11 @@ def vlsp():
     
     print(len(metadata3))
 
+    metadata = metadata1 + metadata2 + metadata3
+    df = pd.DataFrame(metadata, columns=['path', 'transcript', 'duration', 'wpm'])
+    df.to_csv('wpm/vlsp.csv', index=False)
+    print('done processing speaking rate for vlsp dataset')
+
 
 if __name__ == '__main__': 
     # sachnoi()
