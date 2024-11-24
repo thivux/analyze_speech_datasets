@@ -41,13 +41,36 @@ def sachnoi():
 
     df = pd.DataFrame(metadata, columns=['path', 'transcript', 'speaker', 'duration', 'wpm'])
     df.to_csv('wpm/sachnoi.csv', index=False)
-    print('done processing snr for sachnoi dataset')
+    print('done processing speaking rate for sachnoi dataset')
 
         
+def vivoice():
+    repo = "capleaf/viVoice"                                                                                                                  
+    dataset = load_dataset(repo, use_auth_token='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')                                                          
+    print(dataset)
+    dataset = dataset['train']
+    print(f'there are {len(dataset)} samples in vivoice dataset')
+
+    metadata = []
+    for i, sample in tqdm(enumerate(dataset), total=len(dataset)): 
+        audio = sample['audio']
+        duration = len(audio['array']) / audio['sampling_rate']
+        path = audio['path']
+        transcript = sample['text']
+        transcript = normalize_transcript(transcript)
+        wps = len(transcript.split()) / duration
+        wpm = wps * 60
+        metadata.append([path, transcript, duration, wpm])
+    
+    df = pd.DataFrame(metadata, columns=['path', 'transcript', 'duration', 'wpm'])
+    df.to_csv('wpm/vivoice.csv', index=False)
+    print('done processing speaking rate for sachnoi dataset')
+
+    
 if __name__ == '__main__': 
-    sachnoi()
+    # sachnoi()
     # vin27()
-    # vivoice(1)
+    vivoice()
     # bud500()
     # vnceleb()
     # vinbigdata()
