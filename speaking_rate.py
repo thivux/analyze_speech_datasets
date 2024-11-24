@@ -125,6 +125,7 @@ def vlsp():
     for i, row in data.iterrows():
         duration_map[row['path']] = row['duration']
 
+    # ==============================================
     rootdir = '/home/thivt1/data/VLSP_data'
     dev2021 = os.path.join(rootdir, 'VLSP-ASR-2021-labeled_devset')
 
@@ -141,13 +142,58 @@ def vlsp():
     wav_files = [file.replace("/home", '/lustre/scratch/client/vinai/users') for file in wav_files]
     metadata1 = []
     for file in tqdm(wav_files): 
-        breakpoint()
         name = os.path.basename(file)
         duration = duration_map[file]
         transcript = dev2021_map[name]
         wps = len(transcript.split()) / float(duration)
         wpm = wps * 60
         metadata1.append([name, transcript, duration, wpm])
+
+    print(len(metadata1))
+
+    # ==============================================
+    train2021 = os.path.join(rootdir, 'VLSP-ASR-2021-labeled_devset')
+
+    # read the transcript file 
+    transcript_file = os.path.join(train2021, 'transcript.txt')
+    train2021_map = {}
+    with open(transcript_file, 'r') as f:
+        for line in f: 
+            name, transcript = line.strip().split('\t')
+            train2021_map[name + ".wav"] = normalize_transcript(transcript)
+    
+    # list file in the wav folder
+    wav_files = get_wav_files(os.path.join(train2021, 'wav'))
+    wav_files = [file.replace("/home", '/lustre/scratch/client/vinai/users') for file in wav_files]
+    metadata2 = []
+    for file in tqdm(wav_files): 
+        name = os.path.basename(file)
+        duration = duration_map[file]
+        transcript = train2021_map[name]
+        wps = len(transcript.split()) / float(duration)
+        wpm = wps * 60
+        metadata2.append([name, transcript, duration, wpm])
+
+    print(len(metadata2))
+
+    # ==============================================
+    wav_files1 = get_wav_files(os.path.join(rootdir, "vlsp2020_train_set_02"))
+    wav_files2 = get_wav_files(os.path.join(rootdir, "zalo"))
+    wav_files = wav_files1 + wav_files2
+    wav_files = [file.replace("/home", '/lustre/scratch/client/vinai/users') for file in wav_files]
+    metadata3 = []
+    for file in tqdm(wav_files): 
+        name = os.path.basename(file)
+        duration = duration_map[file]
+        txt_file = file.replace('.wav', '.txt')
+        with open(txt_file, 'r') as f:
+            transcript = f.read()
+        transcript = normalize_transcript(transcript)
+        wps = len(transcript.split()) / float(duration)
+        wpm = wps * 60
+        metadata3.append([name, transcript, duration, wpm])
+    
+    print(len(metadata3))
 
 
 if __name__ == '__main__': 
