@@ -88,12 +88,42 @@ def bud500():
     print('done processing speaking rate for bud500 dataset')
 
     
+def get_wav_files(folder_path):
+    wav_files = []
+    
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            if file.endswith('.wav'):
+                wav_files.append(os.path.join(root, file))
+    
+    return wav_files
+
+
+def vinbigdata():
+    data = pd.read_csv('metadata/vinbigdata.csv')
+    paths = data['path'].tolist()
+
+    wpms = []
+    for i, row in paths.iterrows(): 
+        wav_path, duration = row['path'], row['duration']
+        txt_path = wav_path.replace('.wav', '.txt')
+        with open(txt_path, 'r') as f:
+            transcript = f.read()
+        transcript = normalize_transcript(transcript)
+        wps = len(transcript.split()) / float(duration)
+        wpm = wps * 60
+        wpms.append(wpm)
+    
+    data['wpm'] = wpms
+    data.to_csv('wpm/vinbigdata.csv', index=False)
+    print('done processing speaking rate for vinbigdata dataset')
+
+    
 if __name__ == '__main__': 
     # sachnoi()
     # vin27()
     # vivoice()
-    bud500()
-    # vnceleb()
-    # vinbigdata()
+    # bud500()
+    vinbigdata()
     # vivoice()
     # vlsp()
