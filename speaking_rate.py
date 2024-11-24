@@ -138,6 +138,7 @@ def vlsp():
     
     # list file in the wav folder
     wav_files = get_wav_files(os.path.join(dev2021, 'wav'))
+    wav_files = [file.replace("/home", '/lustre/scratch/client/vinai/users') for file in wav_files]
     metadata1 = []
     for file in tqdm(wav_files): 
         breakpoint()
