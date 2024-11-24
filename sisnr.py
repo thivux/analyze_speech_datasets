@@ -12,14 +12,15 @@ import json
 from tqdm.contrib.concurrent import thread_map
 import subprocess
 import librosa
+import glob
 
 import torchaudio
 from speechbrain.inference.separation import SepformerSeparation as separator
 from speechbrain.inference.metrics import SNREstimator as snrest
 
 
-model = separator.from_hparams(source="speechbrain/sepformer-whamr", savedir='pretrained_models/sepformer-whamr')
-snr_est_model = snrest.from_hparams(source="speechbrain/REAL-M-sisnr-estimator",savedir='pretrained_models/REAL-M-sisnr-estimator')
+model = separator.from_hparams(source="speechbrain/sepformer-whamr", savedir='pretrained_models/sepformer-whamr', run_opts={"device":"cuda"}) 
+snr_est_model = snrest.from_hparams(source="speechbrain/REAL-M-sisnr-estimator",savedir='pretrained_models/REAL-M-sisnr-estimator', run_opts={"device":"cuda"})
 
 
 def divide_list_by_idx(lst_length, x, idx):
@@ -33,34 +34,18 @@ def divide_list_by_idx(lst_length, x, idx):
 
 
 def cal_sisnr(path):
-    est_source = model.separate_file(path=path, save_dir='speechbrain-sisnr')
+    est_source = model.separate_file(path=path, savedir='speechbrain-sisnr')
     mix, _ = torchaudio.load(path)
+    mix = mix.to("cuda")
     snrhat = snr_est_model.estimate_batch(mix, est_source)
     return snrhat
 
 
 def sachnoi():
-    # with open("/lustre/scratch/client/vinai/users/thivt1/code/oneshot/artifacts/step14_tone_norm_transcript_no_multispeaker.txt", 'r') as f: 
-    #     for sample in f:
-    #         path, transcript, speaker, duration = sample.strip().split("|")
-    #         metadata.append([path, speaker, duration])
-
-    # with open("/lustre/scratch/client/vinai/users/thivt1/code/VoiceCraft/data/sach_noi_train.json", 'r') as f:
-    #     train_data = json.load(f)
-
-    # with open("/lustre/scratch/client/vinai/users/thivt1/code/VoiceCraft/data/sach_noi_test.json", 'r') as f:
-    #     test_data = json.load(f)
-    rootdir = '/lustre/scratch/client/vinai/users/thivt1/code/oneshot'
-    data = pd.read_csv(os.path.join(rootdir, 'artifacts/step18_short_audio_wer0_train.csv'))
-    # filter audio < 3s
-    data = data[data['duration'] < 3]
-    # sample 1000 audio
-    data = data.sample(1000)
-    paths = data['path'].tolist()
-
+    paths = glob.glob('sachnoi-8khz/*.wav')
     los = []
     his = []
-    for path in paths: 
+    for path in tqdm(paths): 
         lo, hi = cal_sisnr(path)
         los.append(lo.item())
         his.append(hi.item())
