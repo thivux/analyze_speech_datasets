@@ -24,7 +24,7 @@ def process_files(source_paths, target_dir):
 if __name__ == "__main__":
     # sachnoi
     rootdir = '/lustre/scratch/client/vinai/users/thivt1/code/oneshot'
-    data = pd.read_csv(os.path.join(rootdir, 'artifacts/step19_augmented_train.csv'))
+    data = pd.read_csv(os.path.join(rootdir, 'artifacts/step19_augmented_train.csv'), sep='|', names=['path', 'text', 'speaker', 'duration'])
     data = data.sample(1000, random_state=42)
     source_paths = data['path'].tolist()
     source_paths = [os.path.join(rootdir, path) for path in source_paths]
