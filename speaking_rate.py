@@ -67,11 +67,32 @@ def vivoice():
     print('done processing speaking rate for sachnoi dataset')
 
     
+def bud500(): 
+    dataset = load_dataset("linhtran92/viet_bud500")
+    print(dataset)
+    metadata = []
+
+    for split in ['train', 'validation', 'test']:
+        for i, sample in enumerate(tqdm(dataset[split])): 
+            audio = sample['audio']
+            transcript = sample['transcription']
+            transcript = normalize_transcript(transcript)
+            duration = len(audio['array']) / audio['sampling_rate']
+            wps = len(transcript.split()) / duration
+            wpm = wps * 60
+            path = f'{split}_{i}'
+            metadata.append([path, transcript, duration, wpm])
+
+    df = pd.DataFrame(metadata, columns=['path', 'transcript', 'duration', 'wpm'])
+    df.to_csv('wpm/bud500.csv', index=False)
+    print('done processing speaking rate for bud500 dataset')
+
+    
 if __name__ == '__main__': 
     # sachnoi()
     # vin27()
-    vivoice()
-    # bud500()
+    # vivoice()
+    bud500()
     # vnceleb()
     # vinbigdata()
     # vivoice()
