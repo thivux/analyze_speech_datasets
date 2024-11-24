@@ -25,6 +25,17 @@ def process_files(source_paths, target_dir):
         resample_audio(path, target_path)
 
 
+def get_wav_files(folder_path):
+    wav_files = []
+    
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            if file.endswith('.wav'):
+                wav_files.append(os.path.join(root, file))
+    
+    return wav_files
+
+
 if __name__ == "__main__":
     # sachnoi
     # rootdir = '/lustre/scratch/client/vinai/users/thivt1/code/oneshot'
@@ -70,23 +81,33 @@ if __name__ == "__main__":
 
     # bud500 
     # same as vivoice, get 1000 samples, save to dir and then resample
-    repo = "linhtran92/viet_bud500"
-    dataset = load_dataset(repo)
-    dataset = dataset['train']
+    # repo = "linhtran92/viet_bud500"
+    # dataset = load_dataset(repo)
+    # dataset = dataset['train']
+    # random.seed(42)
+    # sampled_dataset = dataset.shuffle(seed=42).select(range(1000))
+    # target_folder = "bud500-16khz"
+    # os.makedirs(target_folder, exist_ok=True)
+    # for i, sample in tqdm(enumerate(sampled_dataset), total=1000):
+    #     audio = sample['audio']
+    #     wav = audio['array']
+    #     sr = audio['sampling_rate']
+    #     path = f'{i}.wav'
+    #     target_path = os.path.join(target_folder, path)
+    #     sf.write(target_path, wav, sr, format='wav')
+
+    # source_paths = glob.glob('bud500-16khz/*.wav')
+    # target_folder = "bud500-8khz"
+    # os.makedirs(target_folder, exist_ok=True)
+    # process_files(source_paths, target_folder)    
+
+    # vnceleb
+    wav_files = get_wav_files("./vietnameceleb/")   
+    # sample 1000 files 
     random.seed(42)
-    sampled_dataset = dataset.shuffle(seed=42).select(range(1000))
-    target_folder = "bud500-16khz"
+    sampled_paths = random.sample(wav_files, 1000)
+    target_folder = "vnceleb-8khz"
     os.makedirs(target_folder, exist_ok=True)
-    for i, sample in tqdm(enumerate(sampled_dataset), total=1000):
-        audio = sample['audio']
-        wav = audio['array']
-        sr = audio['sampling_rate']
-        path = f'{i}.wav'
-        target_path = os.path.join(target_folder, path)
-        sf.write(target_path, wav, sr, format='wav')
-
-    source_paths = glob.glob('bud500-16khz/*.wav')
-    target_folder = "bud500-8khz"
-    os.makedirs(target_folder, exist_ok=True)
-    process_files(source_paths, target_folder)    
-
+    process_files(sampled_paths, target_folder)
+    
+    
