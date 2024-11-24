@@ -106,9 +106,12 @@ def bud500():
     for split in ['train', 'validation', 'test']:
         for i, sample in enumerate(tqdm(dataset[split])): 
             audio = sample['audio']
-            duration = len(audio['array']) / audio['sampling_rate']
-            path = f'{split}_{i}'
-            metadata.append([path, duration])
+            print(f'sampling rate: {audio['sampling_rate']}')
+            break
+
+            # duration = len(audio['array']) / audio['sampling_rate']
+            # path = f'{split}_{i}'
+            # metadata.append([path, duration])
 
     print(f'there are {len(metadata)} samples in bud500')  
 
@@ -187,10 +190,10 @@ if __name__ == '__main__':
     # sachnoi()
     # vin27()
     # vivoice()
-    # bud500()
+    bud500()
     # vnceleb()
     # vinbigdata()
     # vivoice()
-    vlsp()
+    # vlsp()
     
 

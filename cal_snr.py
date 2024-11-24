@@ -85,8 +85,17 @@ def get_duration(filepath):
     return 0
 
 
-def sachnoi():
-    metadata = []
+def divide_list_by_idx(lst_length, x, idx):
+    # Calculate the size of each sublist
+    chunk_size = lst_length // x
+    remainder = lst_length % x  # Handle the case where the list can't be evenly divided
+    # Calculate start and end index for the idx-th chunk
+    start_index = chunk_size * idx + min(idx, remainder)
+    end_index = start_index + chunk_size + (1 if idx < remainder else 0)
+    return (start_index, end_index)
+
+
+def sachnoi(idx):
     # with open("/lustre/scratch/client/vinai/users/thivt1/code/oneshot/artifacts/step14_tone_norm_transcript_no_multispeaker.txt", 'r') as f: 
     #     for sample in f:
     #         path, transcript, speaker, duration = sample.strip().split("|")
@@ -95,27 +104,38 @@ def sachnoi():
     with open("/lustre/scratch/client/vinai/users/thivt1/code/VoiceCraft/data/sach_noi_train.json", 'r') as f:
         train_data = json.load(f)
 
-    for sample in tqdm(train_data): 
-        path = sample['path']
-        speaker = sample['speaker']
-        # duration = sample['duration']
-        snr = wada_snr(path)
-        metadata.append([path, speaker, snr])
-
     with open("/lustre/scratch/client/vinai/users/thivt1/code/VoiceCraft/data/sach_noi_test.json", 'r') as f:
         test_data = json.load(f)
 
-    for sample in tqdm(test_data): 
-        path = sample['path']
-        speaker = sample['speaker']
-        # duration = sample['duration']
-        snr = wada_snr(path)
-        metadata.append([path, speaker, snr])
+    data = train_data + test_data 
 
-    print(f'there are {len(metadata)} samples in sachnoi dataset')
-    df = pd.DataFrame(metadata, columns=['path', 'speaker', 'snr'])
-    df.to_csv('snr/sachnoi.csv', index=False)
-    print('done processing metadata for sachnoi dataset')
+    # for sample in tqdm(test_data): 
+    #     path = sample['path']
+    #     speaker = sample['speaker']
+    #     # duration = sample['duration']
+    #     snr = wada_snr(path)
+    #     metadata.append([path, speaker, snr])
+
+    n = len(data)
+    start, end = divide_list_by_idx(n, 6, idx=idx)
+    print(f'start: {start}, end: {end}')
+    metadata = []
+    paths = []
+    for i, sample in tqdm(enumerate(data), total=len(data)): 
+        if i < start or i >= end:
+            continue
+        path = sample['path']
+        paths.append(path)
+        # speaker = sample['speaker']
+        # snr = wada_snr(path)
+        # metadata.append([path, speaker, snr])
+
+    print(f'paths: {paths[:3]}')
+    snrs = thread_map(wada_snr, paths, max_workers=4)
+    metadata = [[path, snr] for path, snr in zip(paths, snrs)]
+    df = pd.DataFrame(metadata, columns=['path', 'snr'])
+    df.to_csv(f'snr/sachnoi_{idx}.csv', index=False)
+    print('done processing snr for sachnoi dataset')
 
 
 def vin27():
@@ -132,18 +152,6 @@ def vin27():
     df = pd.DataFrame(metadata, columns=['path', 'speaker', 'duration'])
     df.to_csv('metadata/vin27.csv', index=False)
     print('done processing metadata for vin27 dataset')
-
-
-def divide_list_by_idx(lst_length, x, idx):
-    # Calculate the size of each sublist
-    chunk_size = lst_length // x
-    remainder = lst_length % x  # Handle the case where the list can't be evenly divided
-    
-    # Calculate start and end index for the idx-th chunk
-    start_index = chunk_size * idx + min(idx, remainder)
-    end_index = start_index + chunk_size + (1 if idx < remainder else 0)
-    
-    return (start_index, end_index)
 
 
 def vivoice(idx):
@@ -271,12 +279,11 @@ def vlsp():
 
 if __name__ == '__main__': 
     # sachnoi()
+    sachnoi(2)
     # vin27()
-    vivoice(1)
+    # vivoice(1)
     # bud500()
     # vnceleb()
     # vinbigdata()
     # vivoice()
     # vlsp()
-    
-
