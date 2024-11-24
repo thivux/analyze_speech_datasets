@@ -129,15 +129,18 @@ def vnceleb():
 
 
 def vinbigdata(): 
-    wav_files = get_wav_files("./vinbigdata/") 
-    print(f'there are {len(wav_files)} files in vinbigdata dataset')
-    print(wav_files[:3])
-    snrs = thread_map(wada_snr, wav_files, max_workers=4)
+    paths = glob.glob('vinbigdata-8khz/*.wav')
+    los = []
+    his = []
+    for path in tqdm(paths): 
+        lo, hi = cal_sisnr(path)
+        los.append(lo.item())
+        his.append(hi.item())
 
-    metadata = [[file, duration] for file, duration in zip(wav_files, snrs)]
-    df = pd.DataFrame(metadata, columns=['path', 'snr'])
-    df.to_csv('snr/vinbigdata.csv', index=False)
-    print('done processing snr for vinbigdata dataset')
+    metadata = [[path, lo, hi] for path, lo, hi in zip(paths, los, his)]
+    df = pd.DataFrame(metadata, columns=['path', 'sisnr-low', 'sisnr-high'])
+    df.to_csv(f'sisnr/vinbigdata.csv', index=False)
+    print('done processing si-snr for vinbigdata dataset')
 
 
 def find_wav_files(directory):
@@ -170,7 +173,7 @@ if __name__ == '__main__':
     # vin27()
     # vivoice(1)
     # bud500()
-    vnceleb()
-    # vinbigdata()
+    # vnceleb()
+    vinbigdata()
     # vivoice()
     # vlsp()
