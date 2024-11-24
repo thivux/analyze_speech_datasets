@@ -101,10 +101,9 @@ def get_wav_files(folder_path):
 
 def vinbigdata():
     data = pd.read_csv('metadata/vinbigdata.csv')
-    paths = data['path'].tolist()
 
     wpms = []
-    for i, row in paths.iterrows(): 
+    for i, row in data.iterrows(): 
         wav_path, duration = row['path'], row['duration']
         txt_path = wav_path.replace('.wav', '.txt')
         with open(txt_path, 'r') as f:
