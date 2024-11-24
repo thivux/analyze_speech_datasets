@@ -88,23 +88,18 @@ def vivoice():
 
 
 def bud500(): 
-    dataset = load_dataset("linhtran92/viet_bud500")
-    print(dataset)
-    metadata = []
+    paths = glob.glob('bud500-8khz/*.wav')
+    los = []
+    his = []
+    for path in tqdm(paths): 
+        lo, hi = cal_sisnr(path)
+        los.append(lo.item())
+        his.append(hi.item())
 
-    for split in ['train', 'validation', 'test']:
-        for i, sample in enumerate(tqdm(dataset[split])): 
-            audio = sample['audio']
-            # duration = len(audio['array']) / audio['sampling_rate']
-            snr = wada_snr(audio['array'])
-            path = f'{split}_{i}'
-            metadata.append([path, snr])
-
-    print(f'there are {len(metadata)} samples in bud500')  
-
-    df = pd.DataFrame(metadata, columns=['path', 'snr'])
-    df.to_csv('snr/bud500.csv', index=False)
-    print('done processing snr for bud500 dataset')
+    metadata = [[path, lo, hi] for path, lo, hi in zip(paths, los, his)]
+    df = pd.DataFrame(metadata, columns=['path', 'sisnr-low', 'sisnr-high'])
+    df.to_csv(f'sisnr/bud500.csv', index=False)
+    print('done processing si-snr for bud500 dataset')
 
 
 def get_wav_files(folder_path):

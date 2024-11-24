@@ -1,3 +1,4 @@
+import glob
 import random
 from datasets import load_dataset
 from tqdm import tqdm
@@ -57,13 +58,35 @@ if __name__ == "__main__":
     #     librosa.save(audio, target_path, sr=16000)
 
     # vlsp
-    with open('metadata/wav_file_list.txt', 'r') as f:
-        wav_files = [file.strip() for file in f.readlines()]
+    # with open('metadata/wav_file_list.txt', 'r') as f:
+    #     wav_files = [file.strip() for file in f.readlines()]
 
-    # sample 1000 files
+    # # sample 1000 files
+    # random.seed(42)
+    # sampled_paths = random.sample(wav_files, 1000)
+    # target_folder = "vlsp-8khz"
+    # os.makedirs(target_folder, exist_ok=True)
+    # process_files(sampled_paths, target_folder)
+
+    # bud500 
+    # same as vivoice, get 1000 samples, save to dir and then resample
+    repo = "linhtran92/viet_bud500"
+    dataset = load_dataset(repo)
+    dataset = dataset['train']
     random.seed(42)
-    sampled_paths = random.sample(wav_files, 1000)
-    target_folder = "vlsp-8khz"
+    sampled_dataset = dataset.shuffle(seed=42).select(range(1000))
+    target_folder = "bud500-16khz"
     os.makedirs(target_folder, exist_ok=True)
-    process_files(sampled_paths, target_folder)
+    for sample in tqdm(sampled_dataset):
+        audio = sample['audio']
+        wav = audio['array']
+        sr = audio['sampling_rate']
+        path = sample['path']
+        target_path = os.path.join(target_folder, path)
+        sf.write(target_path, wav, sr, format='wav')
+
+    source_paths = glob.glob('bud500-16khz/*.wav')
+    target_folder = "bud500-8khz"
+    os.makedirs(target_folder, exist_ok=True)
+    process_files(source_paths, target_folder)    
 
