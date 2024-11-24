@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import pandas as pd
 import os
 import subprocess
@@ -14,7 +15,7 @@ def resample_audio(source_path, target_path):
 
 def process_files(source_paths, target_dir):
     # trim & norm vol of inference results
-    for path in source_paths:
+    for path in tqdm(source_paths):
         filename = os.path.basename(path)
         target_path = os.path.join(target_dir, filename)
         # normalize vol & resample
