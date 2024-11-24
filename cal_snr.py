@@ -14,7 +14,7 @@ import subprocess
 import librosa
 
 
-def wada_snr(filepath):
+def wada_snr(wav):
     # Direct blind estimation of the SNR of a speech signal.
     #
     # Paper on WADA SNR:
@@ -24,7 +24,7 @@ def wada_snr(filepath):
     #   https://labrosa.ee.columbia.edu/projects/snreval/#9
 
     # read input file 
-    wav, _ = librosa.load(filepath, sr=None)
+    # wav, _ = librosa.load(filepath, sr=None)
 
     # init
     eps = 1e-10
@@ -134,28 +134,51 @@ def vin27():
     print('done processing metadata for vin27 dataset')
 
 
-def vivoice():
+def divide_list_by_idx(lst_length, x, idx):
+    # Calculate the size of each sublist
+    chunk_size = lst_length // x
+    remainder = lst_length % x  # Handle the case where the list can't be evenly divided
+    
+    # Calculate start and end index for the idx-th chunk
+    start_index = chunk_size * idx + min(idx, remainder)
+    end_index = start_index + chunk_size + (1 if idx < remainder else 0)
+    
+    return (start_index, end_index)
+
+
+def vivoice(idx):
     # dataset = load_dataset(
     #     "parquet",
     #     data_files="./viVoice/data/*.parquet",
     #     split="train"
     # )
 
-    dataset = load_dataset("./viVoice")
+    # Load the dataset                                                                                                                            
+    repo = "capleaf/viVoice"                                                                                                                  
+    dataset = load_dataset(repo, use_auth_token='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')                                                          
     print(dataset)
+    dataset = dataset['train']
+    print(f'there are {len(dataset)} samples in vivoice dataset')
+    
+    n = len(dataset)
+    stop_idx = n // 2
+    # start, end = divide_list_by_idx(n, 20, idx)
+    # print(f'start: {start}, end: {end}')
+    # subset = dataset[start:end]
+    # print(f'processing {len(subset)} samples in this subset')
+    metadata = []
+    for i, sample in tqdm(enumerate(dataset), total=n): 
+        if i < stop_idx:
+            continue 
+        audio = sample['audio']
+        wav = audio['array']
+        snr = wada_snr(wav)
+        path = audio['path']
+        metadata.append([path, snr])
 
-    # print(f'there are {len(dataset)} samples in vivoice dataset')
-    #
-    # metadata = []
-    # for sample in tqdm(dataset): 
-    #     audio = sample['audio']
-    #     duration = len(audio['array']) / audio['sampling_rate']
-    #     path = audio['path']
-    #     metadata.append([path, duration])
-    #
-    # df = pd.DataFrame(metadata, columns=['path', 'duration'])
-    # df.to_csv('metadata/vivoice.csv', index=False)
-    # print('done processing metadata for vivoice dataset')
+    df = pd.DataFrame(metadata, columns=['path', 'snr'])
+    df.to_csv(f'snr/vivoice_{idx}.csv', index=False)
+    print('done processing snr for vivoice dataset')
 
 
 def bud500(): 
@@ -247,9 +270,9 @@ def vlsp():
 
 
 if __name__ == '__main__': 
-    sachnoi()
+    # sachnoi()
     # vin27()
-    # vivoice()
+    vivoice(1)
     # bud500()
     # vnceleb()
     # vinbigdata()
