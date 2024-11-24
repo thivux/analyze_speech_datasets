@@ -102,20 +102,20 @@ if __name__ == "__main__":
     # process_files(source_paths, target_folder)    
 
     # vnceleb
-    # wav_files = get_wav_files("./vietnameceleb/")   
-    # # sample 1000 files 
-    # random.seed(42)
-    # sampled_paths = random.sample(wav_files, 1000)
-    # target_folder = "vnceleb-8khz"
-    # os.makedirs(target_folder, exist_ok=True)
-    # process_files(sampled_paths, target_folder)
-    
-    # vinbigdata
-    wav_files = get_wav_files("./vinbigdata/")
+    wav_files = get_wav_files("./vietnameceleb/")   
     # sample 1000 files 
     random.seed(42)
     sampled_paths = random.sample(wav_files, 1000)
-    target_folder = "vinbigdata-8khz"
+    target_folder = "vnceleb-8khz"
     os.makedirs(target_folder, exist_ok=True)
     process_files(sampled_paths, target_folder)
+    
+    # vinbigdata
+    # wav_files = get_wav_files("./vinbigdata/")
+    # # sample 1000 files 
+    # random.seed(42)
+    # sampled_paths = random.sample(wav_files, 1000)
+    # target_folder = "vinbigdata-8khz"
+    # os.makedirs(target_folder, exist_ok=True)
+    # process_files(sampled_paths, target_folder)
     
