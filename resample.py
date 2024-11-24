@@ -107,6 +107,7 @@ if __name__ == "__main__":
     # sample 1000 files 
     random.seed(42)
     sampled_paths = random.sample(wav_files, 1000)
+    breakpoint()
     target_folder = "vnceleb-8khz"
     os.makedirs(target_folder, exist_ok=True)
     process_files(sampled_paths, target_folder)
