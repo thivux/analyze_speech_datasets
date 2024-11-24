@@ -18,8 +18,9 @@ def resample_audio(source_path, target_path):
 
 def process_files(source_paths, target_dir):
     # trim & norm vol of inference results
-    for path in tqdm(source_paths):
-        filename = os.path.basename(path)
+    for i, path in tqdm(enumerate(source_paths), total=len(source_paths)):
+        # filename = os.path.basename(path)
+        filename = f'{i}.wav'
         target_path = os.path.join(target_dir, filename)
         # normalize vol & resample
         resample_audio(path, target_path)
