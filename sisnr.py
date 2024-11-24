@@ -72,39 +72,19 @@ def vin27():
     print('done processing metadata for vin27 dataset')
 
 
-def vivoice(idx):
-    # dataset = load_dataset(
-    #     "parquet",
-    #     data_files="./viVoice/data/*.parquet",
-    #     split="train"
-    # )
+def vivoice():
+    paths = glob.glob('vivoice-8khz/*.wav')
+    los = []
+    his = []
+    for path in tqdm(paths): 
+        lo, hi = cal_sisnr(path)
+        los.append(lo.item())
+        his.append(hi.item())
 
-    # Load the dataset                                                                                                                            
-    repo = "capleaf/viVoice"                                                                                                                  
-    dataset = load_dataset(repo, use_auth_token='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')                                                          
-    print(dataset)
-    dataset = dataset['train']
-    print(f'there are {len(dataset)} samples in vivoice dataset')
-    
-    n = len(dataset)
-    stop_idx = n // 2
-    # start, end = divide_list_by_idx(n, 20, idx)
-    # print(f'start: {start}, end: {end}')
-    # subset = dataset[start:end]
-    # print(f'processing {len(subset)} samples in this subset')
-    metadata = []
-    for i, sample in tqdm(enumerate(dataset), total=n): 
-        if i < stop_idx:
-            continue 
-        audio = sample['audio']
-        wav = audio['array']
-        snr = wada_snr(wav)
-        path = audio['path']
-        metadata.append([path, snr])
-
-    df = pd.DataFrame(metadata, columns=['path', 'snr'])
-    df.to_csv(f'snr/vivoice_{idx}.csv', index=False)
-    print('done processing snr for vivoice dataset')
+    metadata = [[path, lo, hi] for path, lo, hi in zip(paths, los, his)]
+    df = pd.DataFrame(metadata, columns=['path', 'sisnr-low', 'sisnr-high'])
+    df.to_csv(f'sisnr/vivoice.csv', index=False)
+    print('done processing si-snr for vivoice dataset')
 
 
 def bud500(): 
@@ -196,12 +176,12 @@ def vlsp():
 
 
 if __name__ == '__main__': 
-    sachnoi()
+    # sachnoi()
     # sachnoi(2)
     # vin27()
     # vivoice(1)
     # bud500()
     # vnceleb()
     # vinbigdata()
-    # vivoice()
+    vivoice()
     # vlsp()
