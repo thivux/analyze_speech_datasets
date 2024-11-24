@@ -152,27 +152,18 @@ def find_wav_files(directory):
 
 
 def vlsp():
-    directory = "/lustre/scratch/client/vinai/users/thivt1/data/VLSP_data"
+    paths = glob.glob('vlsp-8khz/*.wav')
+    los = []
+    his = []
+    for path in tqdm(paths): 
+        lo, hi = cal_sisnr(path)
+        los.append(lo.item())
+        his.append(hi.item())
 
-    # Get the list of WAV files
-    # wav_files = find_wav_files(directory)
-
-    # Optionally, save the list to a file
-    # with open('metadata/wav_file_list.txt', 'w') as f:
-    #     for file in wav_files:
-    #         f.write(f"{file}\n")
-    with open('metadata/wav_file_list.txt', 'r') as f:
-        wav_files = [file.strip() for file in f.readlines()]
-
-    print(f"\nTotal WAV files found: {len(wav_files)}")
-    print("List saved to metadata/wav_file_list.txt")
-
-    durations = thread_map(wada_snr, wav_files, max_workers=4)
-
-    metadata = [[file, duration] for file, duration in zip(wav_files, durations)]
-    df = pd.DataFrame(metadata, columns=['path', 'snr'])
-    df.to_csv('snr/vlsp.csv', index=False)
-    print('done processing snr for vlsp dataset')
+    metadata = [[path, lo, hi] for path, lo, hi in zip(paths, los, his)]
+    df = pd.DataFrame(metadata, columns=['path', 'sisnr-low', 'sisnr-high'])
+    df.to_csv(f'sisnr/vlsp.csv', index=False)
+    print('done processing si-snr for vlsp dataset')
 
 
 if __name__ == '__main__': 
@@ -183,5 +174,5 @@ if __name__ == '__main__':
     # bud500()
     # vnceleb()
     # vinbigdata()
-    vivoice()
-    # vlsp()
+    # vivoice()
+    vlsp()
