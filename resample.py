@@ -77,11 +77,11 @@ if __name__ == "__main__":
     sampled_dataset = dataset.shuffle(seed=42).select(range(1000))
     target_folder = "bud500-16khz"
     os.makedirs(target_folder, exist_ok=True)
-    for sample in tqdm(sampled_dataset):
+    for i, sample in tqdm(enumerate(sampled_dataset), total=1000):
         audio = sample['audio']
         wav = audio['array']
         sr = audio['sampling_rate']
-        path = sample['path']
+        path = f'{i}.wav'
         target_path = os.path.join(target_folder, path)
         sf.write(target_path, wav, sr, format='wav')
 
